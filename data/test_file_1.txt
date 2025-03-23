@@ -1,0 +1,11 @@
+Id 1	
+name Apple
+price 2,5
+
+Id 2	
+name Bread
+price 0,8
+
+Id 3	
+name Juice
+price 5

@@ -4,14 +4,14 @@ import com.tms.model.Product;
 import com.tms.service.ProductService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
-@Controller
+@RestController
 @RequestMapping("/product")
 public class ProductController {
 
@@ -22,81 +22,49 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @GetMapping("/create")
-    public String getProductPage(){
-        return "createProduct";
-    }
-
-    @PostMapping("/create")
-    public String createProduct(@ModelAttribute("product") Product product, Model model, HttpServletResponse response){
+    @PostMapping
+    public ResponseEntity<Product> createProduct(@RequestBody Product product)  {
         Optional<Product> createdProduct = productService.createProduct(product);
         if(createdProduct.isEmpty()){
-            response.setStatus(HttpServletResponse.SC_CONFLICT);
-            model.addAttribute("message", "Product creation failed");
-            return "innerError";
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+
         }
-        return "redirect:/product/all-products";
+        return new ResponseEntity<>(createdProduct.get(), HttpStatus.CREATED);
     }
 
-    @GetMapping("/edit/{id}")
-    public String getProductEditPage(@PathVariable("id") Long productId, Model model, HttpServletResponse response){
+    @GetMapping("/{id}")
+    public ResponseEntity<Product> getProductById(@PathVariable("id") Long productId){
         Optional<Product> product = productService.getProductById(productId);
         if(product.isEmpty()){
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            model.addAttribute("message", "Product not found id=" + productId);
-            return "innerError";
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        model.addAttribute("product", product.get());
-        return "editProduct";
+        return new ResponseEntity<>(product.get(), HttpStatus.OK);
+    }
+
+    @PutMapping
+    public ResponseEntity<Product> updateProduct(@RequestBody Product product) {
+        Optional<Product> updatedProduct = productService.updateProduct(product);
+        if(updatedProduct.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+        return new ResponseEntity<>(updatedProduct.get(), HttpStatus.OK);
     }
 
     @PostMapping("/{id}")
-    public String getProductById(@PathVariable("id") Long id, Model model, HttpServletResponse response){
-        Optional<Product> product = productService.getProductById(id);
-        if(product.isEmpty()){
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            model.addAttribute("message", "Product not found id=" + id);
-            return "innerError";
-        }
-        response.setStatus(HttpServletResponse.SC_OK);
-        model.addAttribute("product", product.get());
-        return "product";
-    }
-
-    @PostMapping("/update")
-    public String updateProduct(@ModelAttribute("product") Product product, Model model, HttpServletResponse response){
-        Optional<Product> updatedProduct = productService.updateProduct(product);
-        if(updatedProduct.isEmpty()){
-            response.setStatus(HttpServletResponse.SC_CONFLICT);
-            model.addAttribute("message", "Product update failed");
-            return "innerError";
-        }
-        response.setStatus(HttpServletResponse.SC_OK);
-        return "redirect:/product/all-products";
-    }
-
-    @PostMapping("/delete")
-    public String deleteProduct(@RequestParam("id") Long id, Model model, HttpServletResponse response){
-        Optional<Product> deletedProduct = productService.deleteProduct(id);
+    public ResponseEntity<HttpStatus> deleteProduct(@PathVariable("id") Long productId)  {
+        Optional<Product> deletedProduct = productService.deleteProduct(productId);
         if(deletedProduct.isPresent()){
-            response.setStatus(HttpServletResponse.SC_CONFLICT);
-            model.addAttribute("message", "Product is not deleted");
-            return "innerError";
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
-        return "redirect:/product/all-products";
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    //getAll
     @GetMapping("/all-products")
-    public String getUserListPage(Model model, HttpServletResponse response) {
+    public ResponseEntity<List<Product>> getUserListPage(HttpServletResponse response){
         List<Product> products = productService.getAllProducts();
         if (products.isEmpty()) {
-            response.setStatus(HttpServletResponse.SC_CONFLICT);
-            model.addAttribute("message", "Products not found");
-            return "innerError";
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
-        response.setStatus(HttpServletResponse.SC_OK);
-        model.addAttribute("products", products);
-        return "products";
+        return new ResponseEntity<>(products, HttpStatus.OK);
     }
 }

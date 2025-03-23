@@ -22,16 +22,16 @@ public class SecurityService {
         this.userRepository = userRepository;
     }
 
-    public Optional<User> registration(RegistrationRequestDto registrationRequestDto) {
+    public Boolean registration(RegistrationRequestDto registrationRequestDto) {
         try {
-            Optional<Long> userId = securityRepository.registration(registrationRequestDto);
-            if (userId.isEmpty()) {
-                return Optional.empty();
+            if (securityRepository.isLoginUsed(registrationRequestDto.getLogin())){
+                return false;
             }
-            return userRepository.getUserById(userId.get());
+            return  securityRepository.registration(registrationRequestDto);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
-            return Optional.empty();
+            return false;
         }
     }
+
 }

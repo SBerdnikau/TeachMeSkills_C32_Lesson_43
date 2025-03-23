@@ -1,25 +1,15 @@
 package com.tms.controller;
 
-import com.tms.exception.AgeException;
-import com.tms.model.User;
 import com.tms.model.dto.RegistrationRequestDto;
 import com.tms.service.SecurityService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.Objects;
-import java.util.Optional;
-
-@Controller
+@RestController
 @RequestMapping("/security")
 public class SecurityController {
 
@@ -30,30 +20,13 @@ public class SecurityController {
         this.securityService = securityService;
     }
 
-    @GetMapping("/registration")
-    public String registration() {
-        return "registration";
-    }
-
     @PostMapping("/registration")
-    public String registration(@ModelAttribute @Valid RegistrationRequestDto requestDto,
-                               BindingResult bindingResult, Model model) {
+    public ResponseEntity<HttpStatus> registration(@RequestBody @Valid RegistrationRequestDto requestDto,
+                                                   BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            for (ObjectError error : bindingResult.getAllErrors()) {
-                if (Objects.equals(error.getCode(), "CustomAge")) {
-                    throw new AgeException(error.getDefaultMessage());
-                }
-                System.out.println(error);
-            }
-            System.out.println(bindingResult.getAllErrors());
-            return "registration";
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
-        Optional<User> resultUser = securityService.registration(requestDto);
-        if (resultUser.isPresent()) {
-            model.addAttribute("user", resultUser.get());
-            return "user";
-        }
-        return "registration";
+        Boolean result = securityService.registration(requestDto);
+        return new ResponseEntity<>(result?HttpStatus.CREATED:HttpStatus.CONFLICT);
     }
 }

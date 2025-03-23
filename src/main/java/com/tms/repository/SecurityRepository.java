@@ -4,6 +4,7 @@ import com.tms.config.DatabaseService;
 import com.tms.config.SQLQuery;
 import com.tms.model.Role;
 import com.tms.model.Security;
+import com.tms.model.User;
 import com.tms.model.dto.RegistrationRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -26,7 +27,7 @@ public class SecurityRepository {
         this.databaseService = databaseService;
     }
 
-    public Optional<Long> registration(RegistrationRequestDto requestDto) throws SQLException {
+    public Boolean registration(RegistrationRequestDto requestDto) throws SQLException {
         Connection connection = databaseService.getConnection();
 
         try {
@@ -57,12 +58,29 @@ public class SecurityRepository {
             createSecurityStatement.executeUpdate();
 
             connection.commit();
-            return Optional.of(userId);
+            return true;
         } catch (Exception e) {
             System.out.println(e.getMessage());
             connection.rollback();
         }
-        return Optional.empty();
+        return false;
     }
 
+    public Boolean isLoginUsed(String login) {
+        Connection connection = databaseService.getConnection();
+
+        try {
+            PreparedStatement createUserStatement = connection.prepareStatement(SQLQuery.GET_SECURITY_BY_LOGIN);
+            createUserStatement.setString(1, login);
+            ResultSet resultSet = createUserStatement.executeQuery();
+            while (resultSet.next()) {
+                if( resultSet.getString("login").equals(login) ){
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return false;
+    }
 }
