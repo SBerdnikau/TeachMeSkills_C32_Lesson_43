@@ -1,4 +1,4 @@
-
+#  This repository shows implementations of tasks in Spring Boot, such as:
 
 - The working application has been rewritten to REST architecture using ResponseEntity.
 
