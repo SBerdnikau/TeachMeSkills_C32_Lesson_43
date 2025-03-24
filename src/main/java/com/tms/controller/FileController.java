@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -25,14 +24,14 @@ public class FileController {
         this.fileService = fileService;
     }
 
-    //upload files
+    //Upload file
     @PostMapping
     public ResponseEntity<HttpStatus> uploadFile(@RequestParam("file") MultipartFile file) {
         Boolean result = fileService.uploadFile(file);
         return new ResponseEntity<>(result ? HttpStatus.CREATED : HttpStatus.CONFLICT);
     }
 
-    //Uploading multiple files
+    //Download file
     @GetMapping("/{filename}")
     public ResponseEntity<Resource> getFile(@PathVariable String filename) {
         Optional<Resource> resource = fileService.getFile(filename);
@@ -44,6 +43,7 @@ public class FileController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    //Download list files
     @GetMapping
     public ResponseEntity<ArrayList<String>> getListOfFiles() {
         ArrayList<String> files;
@@ -60,4 +60,12 @@ public class FileController {
 
         return new ResponseEntity<>(files, HttpStatus.OK);
     }
+
+    //Delete file
+    @DeleteMapping("/{filename}")
+    public ResponseEntity<HttpStatus> deleteFile(@PathVariable("filename") String filename) {
+        Boolean result = fileService.deleteFileService(filename);
+        return new ResponseEntity<>(result ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);
+    }
+
 }

@@ -2,14 +2,10 @@ package com.tms.service;
 
 import org.springframework.core.io.PathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.FileNotFoundException;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -51,5 +47,14 @@ public class FileService {
                     .filter(path -> !path.equals(ROOT_PATH_FILE))
                     .map(Path::toString)
                     .collect(Collectors.toList());
+    }
+
+    public Boolean deleteFileService(String filename) {
+        Path path = ROOT_PATH_FILE.resolve(filename);
+        File file = new File(path.toString());
+        if (file.exists()) {
+            return file.delete();
+        }
+        return false;
     }
 }
