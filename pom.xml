@@ -10,7 +10,7 @@
     </parent>
 
     <groupId>com.teachmeskills</groupId>
-    <artifactId>TeachMeSkills_HM_Lesson_43</artifactId>
+    <artifactId>TeachMeSkills_HM_Lesson_43_44</artifactId>
     <version>1.0.0</version>
     <packaging>war</packaging>
 
